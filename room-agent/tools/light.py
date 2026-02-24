@@ -1,8 +1,9 @@
 import httpx
 from configuration.constants import NL_URL
+from smolagents import tool
 
 
-async def get_light_state() -> dict:
+def get_light_state() -> dict:
     """
     Retrieve the full current state of the room light.
 
@@ -24,8 +25,8 @@ async def get_light_state() -> dict:
         LookupError: The light resource could not be found (404).
     """
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"{NL_URL}/state")
+        with httpx.Client() as client:
+            response = client.get(f"{NL_URL}/state")
             response.raise_for_status()
 
             return response.json()
@@ -43,7 +44,8 @@ async def get_light_state() -> dict:
         raise
 
 
-async def switch_light(user_value: bool | None = None) -> str:
+@tool
+def switch_light(user_value: bool | None = None) -> str:
     """
     Turn the room light on or off, or toggle it if no user_value is provided.
 
@@ -64,7 +66,7 @@ async def switch_light(user_value: bool | None = None) -> str:
         PermissionError: Authentication failed or access is denied (401).
         LookupError: The light resource could not be found (404).
     """
-    current_state = await get_light_state()
+    current_state = get_light_state()
     is_on = current_state.get("on", {}).get("value", False)
 
     if user_value is True and is_on:
@@ -74,8 +76,8 @@ async def switch_light(user_value: bool | None = None) -> str:
 
     new_value = not is_on if user_value is None else user_value
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.put(
+        with httpx.Client() as client:
+            response = client.put(
                 f"{NL_URL}/state",
                 json={"on": {"value": new_value}},
             )
