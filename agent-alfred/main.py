@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from smolagents.agents import FinalAnswerStep
 from telegram.ext import ApplicationBuilder
 from telegram.ext import CommandHandler
@@ -7,6 +8,8 @@ from telegram.ext import filters
 from telegram.error import NetworkError
 from configuration.constants import TB_TOKEN
 from agent import agent
+
+logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 20  # characters to accumulate before editing the message
 
@@ -56,6 +59,13 @@ async def stream_agent_reply(update, task):
         await with_retry(lambda: message.edit_text(current_text))
 
 
+async def error_handler(update, context):
+    if isinstance(context.error, NetworkError):
+        logger.warning("Network error: %s", context.error)
+    else:
+        logger.error("Unhandled exception", exc_info=context.error)
+
+
 async def start(update, _context):
     await with_retry(
         lambda: update.message.reply_sticker(sticker=open("assets/alfred.webp", "rb"))
@@ -71,6 +81,7 @@ def main():
     app = ApplicationBuilder().token(TB_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    app.add_error_handler(error_handler)
     app.run_polling(bootstrap_retries=-1)
 
 
