@@ -4,10 +4,21 @@ from telegram.ext import ApplicationBuilder
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler
 from telegram.ext import filters
+from telegram.error import NetworkError
 from configuration.constants import TB_TOKEN
 from agent import agent
 
 BATCH_SIZE = 20  # characters to accumulate before editing the message
+
+
+async def with_retry(coro_fn, retries=3, delay=2):
+    for attempt in range(retries):
+        try:
+            return await coro_fn()
+        except NetworkError:
+            if attempt == retries - 1:
+                raise
+            await asyncio.sleep(delay)
 
 
 async def stream_agent_reply(update, task):
@@ -29,7 +40,7 @@ async def stream_agent_reply(update, task):
         return
 
     words = final_answer.split()
-    message = await update.message.reply_text(words[0])
+    message = await with_retry(lambda: update.message.reply_text(words[0]))
     current_text = words[0]
     pending = ""
 
@@ -38,19 +49,21 @@ async def stream_agent_reply(update, task):
         if len(pending) >= BATCH_SIZE:
             current_text += pending
             pending = ""
-            await message.edit_text(current_text)
+            await with_retry(lambda: message.edit_text(current_text))
 
     if pending:
         current_text += pending
-        await message.edit_text(current_text)
+        await with_retry(lambda: message.edit_text(current_text))
 
 
-async def start(update, context):
-    await update.message.reply_sticker(sticker=open("assets/alfred.webp", "rb"))
+async def start(update, _context):
+    await with_retry(
+        lambda: update.message.reply_sticker(sticker=open("assets/alfred.webp", "rb"))
+    )
     await stream_agent_reply(update, update.message.text)
 
 
-async def handle_message(update, context):
+async def handle_message(update, _context):
     await stream_agent_reply(update, update.message.text)
 
 
@@ -58,7 +71,7 @@ def main():
     app = ApplicationBuilder().token(TB_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.run_polling()
+    app.run_polling(bootstrap_retries=-1)
 
 
 if __name__ == "__main__":
