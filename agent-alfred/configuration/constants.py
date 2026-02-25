@@ -8,5 +8,6 @@ NL_URL: str = f"http://{NL_IP}:{NL_PORT}/api/v1/{NL_TOKEN}"
 HF_TOKEN: str = os.environ.get("HF_TOKEN", "")
 TB_TOKEN: str = os.environ.get("TB_TOKEN", "")
 
-GEO_URL = "https://geocoding-api.open-meteo.com/v1/search"
-WEATHER_URL = "https://api.open-meteo.com/v1/forecast"
+GEO_URL = "http://api.openweathermap.org/geo/1.0/direct"
+WEATHER_URL = "https://api.openweathermap.org/data/2.5"
+WEATHER_API = os.environ.get("WEATHER_API", "")
