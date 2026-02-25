@@ -1,7 +1,7 @@
 [project]
-name = "room-agent"
+name = "agent-alfred"
 version = "0.1.0"
-description = "Add your description here"
+description = "Alfred — an AI butler agent that assists with household tasks via Telegram."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
