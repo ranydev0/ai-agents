@@ -2,6 +2,7 @@ from smolagents import InferenceClientModel
 from smolagents import CodeAgent
 from tools.light import switch_light
 from tools.weather import get_weather
+from tools.gmail import create_draft_email
 import yaml
 
 
@@ -18,7 +19,7 @@ with open("prompts.yaml", "r") as stream:
 
 agent = CodeAgent(
     model=model,
-    tools=[switch_light, get_weather],
+    tools=[switch_light, get_weather, create_draft_email],
     additional_authorized_imports=["pandas", "datetime"],
     max_steps=6,
     verbosity_level=1,
