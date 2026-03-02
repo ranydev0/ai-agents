@@ -1,5 +1,5 @@
-import os
 import base64
+from pathlib import Path
 from email.message import EmailMessage
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -10,16 +10,16 @@ from smolagents import tool
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.compose"]
 
-_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
-_TOKEN_PATH = os.path.join(_TOOLS_DIR, "token.json")
-_CREDENTIALS_PATH = os.path.join(_TOOLS_DIR, "credentials.json")
+_ROOT_DIR = Path(__file__).parent.parent
+_TOKEN_PATH = _ROOT_DIR / "token.json"
+_CREDENTIALS_PATH = _ROOT_DIR / "credentials.json"
 
 
 def _authenticate():
     """Authenticate with the Gmail API and return an authorised service client."""
     creds = None
 
-    if os.path.exists(_TOKEN_PATH):
+    if _TOKEN_PATH.exists():
         creds = Credentials.from_authorized_user_file(_TOKEN_PATH, SCOPES)
 
     if not creds or not creds.valid:

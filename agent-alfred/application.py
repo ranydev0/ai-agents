@@ -7,7 +7,7 @@ from telegram.ext import MessageHandler
 from telegram.ext import filters
 from telegram.error import NetworkError
 from configuration.constants import TB_TOKEN
-from agent import agent
+from services.agent import agent
 
 logger = logging.getLogger(__name__)
 

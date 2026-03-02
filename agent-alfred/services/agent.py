@@ -4,6 +4,7 @@ from tools.light import switch_light
 from tools.weather import get_weather
 from tools.gmail import create_draft_email
 import yaml
+from pathlib import Path
 
 
 model = InferenceClientModel(
@@ -14,7 +15,8 @@ model = InferenceClientModel(
     provider="nscale",
 )
 
-with open("prompts.yaml", "r") as stream:
+prompts_path = Path(__file__).parent.parent / "configuration" / "prompts.yaml"
+with open(prompts_path, "r") as stream:
     prompt_templates = yaml.safe_load(stream)
 
 agent = CodeAgent(
