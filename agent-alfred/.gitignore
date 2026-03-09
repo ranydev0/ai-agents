@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+
+# uv
+.venv/
+.python-version
+
+# Ruff
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables
+.env
+
+# Gmail OAuth tokens
+token.json
+credentials.json
